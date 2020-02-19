@@ -5,4 +5,4 @@ set GOPATH=%cd%
 set GOARCH=amd64
 set GOOS=windows
 cd %prjPath%
-go build -o gateway.exe -v -ldflags="-s -w"
+go build -v -ldflags="-s -w"
