@@ -1,0 +1,30 @@
+{
+    "debug":1,
+    "servers": {
+        "server":[
+            {
+                "listen":9097,
+                "servername": [""],
+                "whitelist": [],
+                "blacklist": [],
+                "ssl": "off",
+                "ssl_certfile": "",
+                "ssl_keyfile": ""
+            },
+            {
+                "listen":19097,
+                "servername": [""],
+                "whitelist": [],
+                "blacklist": [],
+                "ssl": "off",
+                "ssl_certfile": "",
+                "ssl_keyfile": ""
+            }
+        ]
+    },
+    "backend": {
+        "host": "127.0.0.1:8830",
+        "scheme": "ws",
+        "path": "ws"
+    }
+}

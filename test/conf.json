@@ -1,0 +1,11 @@
+{
+    "debug": 1,
+    "count": 1,
+    "millisecond": 500,
+    "send": true,
+    "ws":{
+        "host": "127.0.0.1:9097",
+        "scheme": "ws",
+        "path": "ws"
+    }
+}

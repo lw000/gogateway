@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package Tmsg;
+
+//测试请求接口
+message ReqTestMessage {
+    uint32 uid = 1;		//用户id
+    string msg = 2;		//消息
+}
+
+//测试请求回应接口
+message AckTestMessage {
+    uint32 code = 1; 		//错误码
+    string msg = 2;		    //消息
+}
