@@ -12,8 +12,11 @@ import (
 	"time"
 )
 
+type MsgHooks = func(pk *typacket.Packet) bool
+
 type Server struct {
-	m *melody.Melody
+	m             *melody.Melody
+	messagesHooks []MsgHooks
 }
 
 var (
@@ -64,6 +67,10 @@ func (serve *Server) Stop() {
 	}
 }
 
+func (serve *Server) AddMessageHook(fun MsgHooks) {
+	serve.messagesHooks = append(serve.messagesHooks, fun)
+}
+
 func (serve *Server) HandleRequest(w http.ResponseWriter, r *http.Request) error {
 	return serve.m.HandleRequestWithKeys(w, r, nil)
 }
@@ -96,6 +103,19 @@ func (serve *Server) onBinaryMessageHandler(s *melody.Session, msg []byte) {
 		return
 	}
 
+	var allowForward = true
+	for _, hook := range serve.messagesHooks {
+		allowForward = hook(pk)
+		if !allowForward {
+			break
+		}
+	}
+
+	if !allowForward {
+		_ = s.CloseWithMsg([]byte("error"))
+		return
+	}
+
 	// if pk.CheckCode() != 123456 {
 	// 	err = s.CloseWithMsg([]byte("Illegal Packet"))
 	// 	if err != nil {
@@ -106,13 +126,25 @@ func (serve *Server) onBinaryMessageHandler(s *melody.Session, msg []byte) {
 
 	// log.Info("sessionId:%d, pk:%+v", sessionId, pk)
 
-	err = backend.Instance().WriteBinaryMessage(pk.Mid(), pk.Sid(), sessionId, pk.Data())
-	if err != nil {
-		log.Error(err)
-		// err = s.CloseWithMsg([]byte("error"))
-		// if err != nil {
-		// 	log.Error(err)
-		// }
+	switch true {
+	case true:
+		err = backend.Instance().WriteBinaryMessage(pk.Mid(), pk.Sid(), sessionId, pk.Data())
+		if err != nil {
+			log.Error(err)
+			err = s.CloseWithMsg([]byte("error"))
+			if err != nil {
+				log.Error(err)
+			}
+		}
+	default:
+		err = backend.Instance().WriteBinaryMessage(pk.Mid(), pk.Sid(), sessionId, pk.Data())
+		if err != nil {
+			log.Error(err)
+			err = s.CloseWithMsg([]byte("error"))
+			if err != nil {
+				log.Error(err)
+			}
+		}
 	}
 }
 

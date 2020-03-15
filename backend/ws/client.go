@@ -229,7 +229,7 @@ func (w *WsClient) WriteTextMessage(data []byte) error {
 	}
 	// log.Info("in: %d", len(w.output))
 	return nil
-	return w.write(&envelope{mt: websocket.BinaryMessage, msg: data})
+	// return w.write(&envelope{mt: websocket.BinaryMessage, msg: data})
 }
 
 func (w *WsClient) WriteProtoMessage(mid, sid uint16, clientId uint32, pb proto.Message) error {
@@ -255,7 +255,7 @@ func (w *WsClient) WriteProtoMessage(mid, sid uint16, clientId uint32, pb proto.
 	}
 	// log.Info("in: %d", len(w.output))
 	return nil
-	return w.write(&envelope{mt: websocket.BinaryMessage, msg: pk.Data()})
+	// return w.write(&envelope{mt: websocket.BinaryMessage, msg: pk.Data()})
 }
 
 func (w *WsClient) WriteBinaryMessage(mid, sid uint16, clientId uint32, data []byte) (err error) {
@@ -277,7 +277,7 @@ func (w *WsClient) WriteBinaryMessage(mid, sid uint16, clientId uint32, data []b
 	}
 	// log.Info("in: %d", len(w.output))
 	return
-	return w.write(&envelope{mt: websocket.BinaryMessage, msg: pk.Data()})
+	// return w.write(&envelope{mt: websocket.BinaryMessage, msg: pk.Data()})
 }
 
 func (w *WsClient) ping() error {

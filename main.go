@@ -52,6 +52,8 @@ func (p *Program) Start() error {
 		return err
 	}
 
+	frontend.Instance().AddMessageHook(frontend.CheckMessageCode())
+
 	// TODO: 启动http服务
 	err = p.htpServe.Start(global.ProjectConfig.Debug, global.ProjectConfig.Servers.Server)
 	if err != nil {

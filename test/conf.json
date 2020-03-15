@@ -1,7 +1,7 @@
 {
     "debug": 1,
     "count": 1,
-    "millisecond": 500,
+    "millisecond": 2000,
     "send": true,
     "ws":{
         "host": "127.0.0.1:9097",
