@@ -14,72 +14,81 @@ import (
 )
 
 type Server struct {
-	c *client.WsClient
+	wsc *client.WsClient
 }
 
+const (
+	MaxMessageSize    = 1024
+	MessageBufferSize = 1024
+)
+
 var (
-	serveInstance     *Server
-	serveInstanceOnce sync.Once
+	_serveInstance     *Server
+	_serveInstanceOnce sync.Once
 )
 
 func New() *Server {
-	s := &Server{
-		c: client.New(client.Config{MaxMessageSize: 1024, MessageBufferSize: 1024}),
+	cfg := client.Config{MaxMessageSize: MaxMessageSize, MessageBufferSize: MessageBufferSize}
+	serve := &Server{
+		wsc: client.New(cfg),
 	}
-	s.init()
-	return s
-}
-
-func Instance() *Server {
-	serveInstanceOnce.Do(func() {
-		serveInstance = New()
-	})
-	return serveInstance
-}
-
-func (serve *Server) init() *Server {
-	serve.c.HandleMessageBinary(serve.onMessageBinaryHandler)
-	serve.c.HandleError(serve.onErrorHandler)
+	serve.init()
 	return serve
 }
 
-func (serve *Server) Start() error {
-	err := serve.c.Open(global.ProjectConfig.BackendConf.Scheme, global.ProjectConfig.BackendConf.Host, global.ProjectConfig.BackendConf.Path)
+func Instance() *Server {
+	_serveInstanceOnce.Do(func() {
+		_serveInstance = New()
+	})
+	return _serveInstance
+}
+
+func (s *Server) init() *Server {
+	s.wsc.HandleMessageBinary(s.onMessageBinaryHandler)
+	s.wsc.HandleError(s.onErrorHandler)
+	return s
+}
+
+func (s *Server) Start() error {
+	err := s.wsc.Open(global.ProjectConfig.BackendConf.Scheme, global.ProjectConfig.BackendConf.Host, global.ProjectConfig.BackendConf.Path)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	go serve.c.Run()
+	go s.wsc.Run()
 
-	err = serve.registerService()
+	err = s.registerService()
 	if err != nil {
-		log.Info(err)
+		log.Error(err)
 		return err
 	}
 
 	return nil
 }
 
-func (serve *Server) Stop() {
-	if serve == nil {
+func (s *Server) Stop() {
+	if s == nil {
 		return
 	}
-	serve.c.Close()
+	s.wsc.Close()
 }
 
-func (serve *Server) WriteProtoMessage(mid, sid uint16, clientId uint32, pb proto.Message) error {
-	return serve.c.WriteProtoMessage(mid, sid, clientId, pb)
+func (s *Server) WriteProtoMessage(mid, sid uint16, clientId uint32, pb proto.Message) error {
+	return s.wsc.WriteProtoMessage(mid, sid, clientId, pb)
 }
 
-func (serve *Server) WriteBinaryMessage(mid, sid uint16, clientId uint32, data []byte) error {
-	return serve.c.WriteBinaryMessage(mid, sid, clientId, data)
+func (s *Server) WriteBinaryMessage(mid, sid uint16, clientId uint32, data []byte) error {
+	return s.wsc.WriteBinaryMessage(mid, sid, clientId, data)
 }
 
 // 注册服务到路由服务器
-func (serve *Server) registerService() error {
-	req := Tserve.ReqRegService{ServerId: constant.GATEWAY_SERVER_ID, SvrType: constant.GATEWAY_SERVER_TYPE}
-	err := serve.c.WriteProtoMessage(constant.MDM_GATEWAY_SERVICE, constant.SUB_GATEWAY_SERVICE_REGISTER, tyutils.HashCode(tyutils.UUID()), &req)
+func (s *Server) registerService() error {
+	req := Tserve.ReqRegService{
+		ServerId: constant.GATEWAY_SERVER_ID,
+		SvrType:  constant.GATEWAY_SERVER_TYPE,
+	}
+	err := s.wsc.WriteProtoMessage(constant.MDM_GATEWAY_SERVICE, constant.SUB_GATEWAY_SERVICE_REGISTER, tyutils.HashCode(tyutils.UUID()), &req)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -87,7 +96,7 @@ func (serve *Server) registerService() error {
 	return nil
 }
 
-func (serve *Server) onMessageBinaryHandler(msg []byte) error {
+func (s *Server) onMessageBinaryHandler(msg []byte) error {
 	pk, err := typacket.NewPacketWithData(msg)
 	if err != nil {
 		log.Error("接收到非法协议")
@@ -119,10 +128,11 @@ func (serve *Server) onMessageBinaryHandler(msg []byte) error {
 		err = users.Instance().WriteMessage(pk.ClientId(), ack.Data())
 		if err != nil {
 			log.Error(err)
+			return err
 		}
 	}
 	return nil
 }
 
-func (serve *Server) onErrorHandler(w *client.WsClient, err error) {
+func (s *Server) onErrorHandler(w *client.WsClient, err error) {
 }
