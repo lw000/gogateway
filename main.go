@@ -1,4 +1,4 @@
-// tuyue_gateway project main.go
+// gogateway project main.go
 package main
 
 import (

@@ -1,6 +1,6 @@
-// tuyue_gateway project doc.go
+// gogateway project doc.go
 
 /*
-tuyue_gateway document
+gogateway document
 */
 package main

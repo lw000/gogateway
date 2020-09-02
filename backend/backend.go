@@ -99,7 +99,7 @@ func (s *Server) registerService() error {
 func (s *Server) onMessageBinaryHandler(msg []byte) error {
 	pk, err := typacket.NewPacketWithData(msg)
 	if err != nil {
-		log.Error("接收到非法协议")
+		log.Error("非法协议")
 		return err
 	}
 
