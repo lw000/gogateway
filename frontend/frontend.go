@@ -25,10 +25,10 @@ var (
 )
 
 func New() *Server {
-	svr := &Server{
+	serve := &Server{
 		m: melody.New(),
 	}
-	return svr.init()
+	return serve.init()
 }
 
 func Instance() *Server {
@@ -89,12 +89,12 @@ func (serve *Server) onErrorHandler(s *melody.Session, e error) {
 
 func (serve *Server) onBinaryMessageHandler(s *melody.Session, msg []byte) {
 	var err error
-	value, exists := s.Get("sessionId")
+	v, exists := s.Get("sessionId")
 	if !exists {
 		_ = s.CloseWithMsg([]byte("error"))
 		return
 	}
-	sessionId := value.(uint32)
+	sessionId := v.(uint32)
 
 	var pk *typacket.Packet
 	pk, err = typacket.NewPacketWithData(msg)

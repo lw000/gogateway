@@ -26,25 +26,27 @@ func Instance() *ClientSessions {
 	return clientSessions
 }
 
-func (cs *ClientSessions) Add(sessionId uint32, s *melody.Session) {
-	cs.sessions.Store(sessionId, s)
+func (c *ClientSessions) Add(sessionId uint32, s *melody.Session) {
+	c.sessions.Store(sessionId, s)
 }
 
-func (cs *ClientSessions) Remove(sessionId uint32) {
-	cs.sessions.Delete(sessionId)
+func (c *ClientSessions) Remove(sessionId uint32) {
+	c.sessions.Delete(sessionId)
 }
 
-func (cs *ClientSessions) WriteMessage(clientId uint32, data []byte) error {
-	value, exists := cs.sessions.Load(clientId)
+func (c *ClientSessions) WriteMessage(clientId uint32, data []byte) error {
+	v, exists := c.sessions.Load(clientId)
 	if !exists {
 		return errors.New(0, "客户端不存在")
 	}
-
-	session, ok := value.(*melody.Session)
-	if ok {
-		if !session.IsClosed() {
-			return session.WriteBinary(data)
-		}
+	session, ok := v.(*melody.Session)
+	if !ok {
+		return errors.New(0, "内部错误")
 	}
-	return errors.New(0, "未知错误")
+
+	if !session.IsClosed() {
+		return session.WriteBinary(data)
+	}
+
+	return nil
 }
