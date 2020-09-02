@@ -115,16 +115,16 @@ func main() {
 		mid := pk.Mid()
 		sid := pk.Sid()
 		switch mid {
-		case constant.MDM_GATEWAY_SERVICE:
+		case constant.MdmGatewayService:
 			switch sid {
-			case constant.SUB_GATEWAY_SERVICE_REGISTER:
+			case constant.SubGatewayServiceRegister:
 				control.OnRegisterService(s, pk)
 			default:
 
 			}
-		case constant.MDM_CLIENT:
+		case constant.MdmClient:
 			switch sid {
-			case constant.SUB_CLIENT_MSG:
+			case constant.SubClientMsg:
 				control.OnMessage(s, pk)
 			default:
 

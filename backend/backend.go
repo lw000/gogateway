@@ -85,10 +85,10 @@ func (s *Server) WriteBinaryMessage(mid, sid uint16, clientId uint32, data []byt
 // 注册服务到路由服务器
 func (s *Server) registerService() error {
 	req := Tserve.ReqRegService{
-		ServerId: constant.GATEWAY_SERVER_ID,
-		SvrType:  constant.GATEWAY_SERVER_TYPE,
+		ServerId: constant.GatewayServerId,
+		SvrType:  constant.GatewayServerType,
 	}
-	err := s.wsc.WriteProtoMessage(constant.MDM_GATEWAY_SERVICE, constant.SUB_GATEWAY_SERVICE_REGISTER, tyutils.HashCode(tyutils.UUID()), &req)
+	err := s.wsc.WriteProtoMessage(constant.MdmGatewayService, constant.SubGatewayServiceRegister, tyutils.HashCode(tyutils.UUID()), &req)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -104,9 +104,9 @@ func (s *Server) onMessageBinaryHandler(msg []byte) error {
 	}
 
 	switch pk.Mid() {
-	case constant.MDM_GATEWAY_SERVICE:
+	case constant.MdmGatewayService:
 		switch pk.Sid() {
-		case constant.SUB_GATEWAY_SERVICE_REGISTER:
+		case constant.SubGatewayServiceRegister:
 			var ack Tserve.AckRegService
 			if err = proto.Unmarshal(pk.Data(), &ack); err != nil {
 				log.Error(err)

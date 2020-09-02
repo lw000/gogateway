@@ -12,11 +12,11 @@ import (
 	"time"
 )
 
-type MsgHooks = func(pk *typacket.Packet) bool
+type MsgHooksFunc = func(pk *typacket.Packet) bool
 
 type Server struct {
 	m             *melody.Melody
-	messagesHooks []MsgHooks
+	messagesHooks []MsgHooksFunc
 }
 
 var (
@@ -67,7 +67,7 @@ func (serve *Server) Stop() {
 	}
 }
 
-func (serve *Server) AddMessageHook(fun MsgHooks) {
+func (serve *Server) AddMessageHook(fun MsgHooksFunc) {
 	serve.messagesHooks = append(serve.messagesHooks, fun)
 }
 

@@ -40,7 +40,7 @@ func TestMessage(fc *client.WsClient, uid uint32) {
 		case <-t.C:
 			{
 				req := Tmsg.ReqTestMessage{Uid: uid, Msg: "test message 1"}
-				err := fc.WriteProtoMessage(constant.MDM_CLIENT, constant.SUB_CLIENT_MSG, &req, &EventHandler{})
+				err := fc.WriteProtoMessage(constant.MdmClient, constant.SubClientMsg, &req, &EventHandler{})
 				if err != nil {
 					log.Println(err)
 					return
@@ -49,7 +49,7 @@ func TestMessage(fc *client.WsClient, uid uint32) {
 
 			{
 				req := Tmsg.ReqTestMessage{Uid: uid, Msg: "test message 2"}
-				err := fc.WriteProtoMessage(constant.MDM_CLIENT, constant.SUB_CLIENT_MSG, &req, &EventHandler{})
+				err := fc.WriteProtoMessage(constant.MdmClient, constant.SubClientMsg, &req, &EventHandler{})
 				if err != nil {
 					log.Println(err)
 					return
