@@ -1,52 +1,47 @@
 package users
 
 import (
-	"github.com/olahol/melody"
+	"gogateway/agent"
 	"gogateway/errors"
 	"sync"
 )
 
-type ClientSessions struct {
-	sessions sync.Map
+type ClientAgents struct {
+	agents sync.Map
 }
 
 var (
-	clientSessions     *ClientSessions
-	clientSessionsOnce sync.Once
+	clientAgents     *ClientAgents
+	clientAgentsOnce sync.Once
 )
 
-func New() *ClientSessions {
-	return &ClientSessions{}
+func New() *ClientAgents {
+	return &ClientAgents{}
 }
 
-func Instance() *ClientSessions {
-	clientSessionsOnce.Do(func() {
-		clientSessions = New()
+func Instance() *ClientAgents {
+	clientAgentsOnce.Do(func() {
+		clientAgents = New()
 	})
-	return clientSessions
+	return clientAgents
 }
 
-func (c *ClientSessions) Add(sessionId uint32, s *melody.Session) {
-	c.sessions.Store(sessionId, s)
+func (c *ClientAgents) Add(clientId uint32, agent *agent.Agent) {
+	c.agents.Store(clientId, agent)
 }
 
-func (c *ClientSessions) Remove(sessionId uint32) {
-	c.sessions.Delete(sessionId)
+func (c *ClientAgents) Remove(clientId uint32) {
+	c.agents.Delete(clientId)
 }
 
-func (c *ClientSessions) WriteMessage(clientId uint32, data []byte) error {
-	v, exists := c.sessions.Load(clientId)
+func (c *ClientAgents) WriteMessage(clientId uint32, data []byte) error {
+	v, exists := c.agents.Load(clientId)
 	if !exists {
 		return errors.New(0, "客户端不存在")
 	}
-	session, ok := v.(*melody.Session)
+	clientAgent, ok := v.(*agent.Agent)
 	if !ok {
 		return errors.New(0, "内部错误")
 	}
-
-	if !session.IsClosed() {
-		return session.WriteBinary(data)
-	}
-
-	return nil
+	return clientAgent.WriteMessage(data)
 }

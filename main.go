@@ -46,13 +46,11 @@ func (p *Program) Start() error {
 		return err
 	}
 
-	// TODO: 启动网关服务
 	if err = frontend.Instance().Start(); err != nil {
 		log.Error(err)
 		return err
 	}
-
-	frontend.Instance().AddMessageHook(frontend.CheckMessageCode())
+	// frontend.Instance().AddMessageHook(frontend.CheckMessageCode())
 
 	// TODO: 启动http服务
 	err = p.htpServe.Start(global.ProjectConfig.Debug, global.ProjectConfig.Servers.Server)

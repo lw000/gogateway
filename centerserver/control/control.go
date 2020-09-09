@@ -63,8 +63,8 @@ func OnMessage(s *melody.Session, pk *typacket.Packet) {
 
 // func registerHub() {
 // 	hub := tyhub.NewHub()
-// 	hub.AddHandler(constant.MDM_GATEWAY_SERVICE, constant.SUB_GATEWAY_SERVICE_REGISTER, &tyhub.Handler{Fn:onRegisgerService})
-// 	hub.AddHandler(constant.MDM_CLIENT, constant.SUB_CLIENT_MSG, &tyhub.Handler{Fn:onMessage})
+// 	hub.AddHandler(constants.MDM_GATEWAY_SERVICE, constants.SUB_GATEWAY_SERVICE_REGISTER, &tyhub.Handler{Fn:onRegisgerService})
+// 	hub.AddHandler(constants.MDM_CLIENT, constants.SUB_CLIENT_MSG, &tyhub.Handler{Fn:onMessage})
 // }
 //
 //

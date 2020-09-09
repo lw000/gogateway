@@ -1,4 +1,4 @@
-package constant
+package constants
 
 const (
 	GatewayServerId   = 2501 // 服务器ID

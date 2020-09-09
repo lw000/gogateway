@@ -7,7 +7,7 @@ import (
 	"github.com/lw000/gocommon/network/ws/packet"
 	"github.com/lw000/gocommon/utils"
 	log "github.com/sirupsen/logrus"
-	"gogateway/constant"
+	"gogateway/constants"
 	"gogateway/protos/msg"
 	"gogateway/test/client"
 	"gogateway/test/config"
@@ -40,7 +40,7 @@ func TestMessage(fc *client.WsClient, uid uint32) {
 		case <-t.C:
 			{
 				req := Tmsg.ReqTestMessage{Uid: uid, Msg: "test message 1"}
-				err := fc.WriteProtoMessage(constant.MdmClient, constant.SubClientMsg, &req, &EventHandler{})
+				err := fc.WriteProtoMessage(constants.MdmClient, constants.SubClientMsg, &req, &EventHandler{})
 				if err != nil {
 					log.Println(err)
 					return
@@ -49,7 +49,7 @@ func TestMessage(fc *client.WsClient, uid uint32) {
 
 			{
 				req := Tmsg.ReqTestMessage{Uid: uid, Msg: "test message 2"}
-				err := fc.WriteProtoMessage(constant.MdmClient, constant.SubClientMsg, &req, &EventHandler{})
+				err := fc.WriteProtoMessage(constants.MdmClient, constants.SubClientMsg, &req, &EventHandler{})
 				if err != nil {
 					log.Println(err)
 					return

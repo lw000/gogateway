@@ -6,7 +6,7 @@ import (
 	"github.com/lw000/gocommon/utils"
 	log "github.com/sirupsen/logrus"
 	"gogateway/backend/ws"
-	"gogateway/constant"
+	"gogateway/constants"
 	"gogateway/global"
 	"gogateway/protos/serve"
 	"gogateway/users"
@@ -85,10 +85,10 @@ func (s *Server) WriteBinaryMessage(mid, sid uint16, clientId uint32, data []byt
 // 注册服务到路由服务器
 func (s *Server) registerService() error {
 	req := Tserve.ReqRegService{
-		ServerId: constant.GatewayServerId,
-		SvrType:  constant.GatewayServerType,
+		ServerId: constants.GatewayServerId,
+		SvrType:  constants.GatewayServerType,
 	}
-	err := s.wsc.WriteProtoMessage(constant.MdmGatewayService, constant.SubGatewayServiceRegister, tyutils.HashCode(tyutils.UUID()), &req)
+	err := s.wsc.WriteProtoMessage(constants.MdmGatewayService, constants.SubGatewayServiceRegister, tyutils.HashCode(tyutils.UUID()), &req)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -104,9 +104,9 @@ func (s *Server) onMessageBinaryHandler(msg []byte) error {
 	}
 
 	switch pk.Mid() {
-	case constant.MdmGatewayService:
+	case constants.MdmGatewayService:
 		switch pk.Sid() {
-		case constant.SubGatewayServiceRegister:
+		case constants.SubGatewayServiceRegister:
 			var ack Tserve.AckRegService
 			if err = proto.Unmarshal(pk.Data(), &ack); err != nil {
 				log.Error(err)

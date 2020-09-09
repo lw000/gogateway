@@ -6,7 +6,7 @@ import (
 	"github.com/lw000/gocommon/network/ws/packet"
 	"github.com/olahol/melody"
 	log "github.com/sirupsen/logrus"
-	"gogateway/constant"
+	"gogateway/constants"
 	"gogateway/wsserve/config"
 	"gogateway/wsserve/control"
 	"net/http"
@@ -89,7 +89,7 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 
-	config.ConfigLocalFilesystemLogger("log", "wsserve", time.Hour*24*365, time.Hour*24)
+	config.ConfigLocalFilesystemLogger("log", "centerserver", time.Hour*24*365, time.Hour*24)
 
 	engine := gin.Default()
 
@@ -115,16 +115,16 @@ func main() {
 		mid := pk.Mid()
 		sid := pk.Sid()
 		switch mid {
-		case constant.MdmGatewayService:
+		case constants.MdmGatewayService:
 			switch sid {
-			case constant.SubGatewayServiceRegister:
+			case constants.SubGatewayServiceRegister:
 				control.OnRegisterService(s, pk)
 			default:
 
 			}
-		case constant.MdmClient:
+		case constants.MdmClient:
 			switch sid {
-			case constant.SubClientMsg:
+			case constants.SubClientMsg:
 				control.OnMessage(s, pk)
 			default:
 

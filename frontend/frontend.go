@@ -5,6 +5,7 @@ import (
 	"github.com/lw000/gocommon/utils"
 	"github.com/olahol/melody"
 	log "github.com/sirupsen/logrus"
+	"gogateway/agent"
 	"gogateway/backend"
 	"gogateway/users"
 	"net/http"
@@ -20,8 +21,8 @@ type Server struct {
 }
 
 var (
-	serveInstance     *Server
-	serveInstanceOnce sync.Once
+	serve     *Server
+	serveOnce sync.Once
 )
 
 func New() *Server {
@@ -32,10 +33,10 @@ func New() *Server {
 }
 
 func Instance() *Server {
-	serveInstanceOnce.Do(func() {
-		serveInstance = New()
+	serveOnce.Do(func() {
+		serve = New()
 	})
-	return serveInstance
+	return serve
 }
 
 func (serve *Server) init() *Server {
@@ -55,6 +56,7 @@ func (serve *Server) init() *Server {
 }
 
 func (serve *Server) Start() error {
+
 	return nil
 }
 
@@ -67,8 +69,8 @@ func (serve *Server) Stop() {
 	}
 }
 
-func (serve *Server) AddMessageHook(fun MsgHooksFunc) {
-	serve.messagesHooks = append(serve.messagesHooks, fun)
+func (serve *Server) AddMessageHook(fun ...MsgHooksFunc) {
+	serve.messagesHooks = append(serve.messagesHooks, fun...)
 }
 
 func (serve *Server) HandleRequest(w http.ResponseWriter, r *http.Request) error {
@@ -76,25 +78,20 @@ func (serve *Server) HandleRequest(w http.ResponseWriter, r *http.Request) error
 }
 
 func (serve *Server) onConnectHandler(s *melody.Session) {
-	sessionId := tyutils.HashCode(tyutils.UUID())
-	s.Set("sessionId", sessionId)
-	users.Instance().Add(sessionId, s)
-	log.Infof("客户端连接, sessionId:%d", sessionId)
-}
-
-func (serve *Server) onErrorHandler(s *melody.Session, e error) {
-	sessionId := serve.getSessionId(s)
-	log.Infof("客户端错误, sessionId: %d, err:%s", sessionId, e.Error())
+	clientId := tyutils.HashCode(tyutils.UUID())
+	s.Set("clientId", clientId)
+	users.Instance().Add(clientId, agent.New(clientId, s))
+	log.Infof("客户端连接, clientId:%d", clientId)
 }
 
 func (serve *Server) onBinaryMessageHandler(s *melody.Session, msg []byte) {
 	var err error
-	v, exists := s.Get("sessionId")
+	v, exists := s.Get("clientId")
 	if !exists {
 		_ = s.CloseWithMsg([]byte("error"))
 		return
 	}
-	sessionId := v.(uint32)
+	clientId := v.(uint32)
 
 	var pk *typacket.Packet
 	pk, err = typacket.NewPacketWithData(msg)
@@ -123,12 +120,11 @@ func (serve *Server) onBinaryMessageHandler(s *melody.Session, msg []byte) {
 	// 	}
 	// 	return
 	// }
-
-	// log.Info("sessionId:%d, pk:%+v", sessionId, pk)
+	// log.Info("clientId:%d, pk:%+v", clientId, pk)
 
 	switch true {
 	case true:
-		err = backend.Instance().WriteBinaryMessage(pk.Mid(), pk.Sid(), sessionId, pk.Data())
+		err = backend.Instance().WriteBinaryMessage(pk.Mid(), pk.Sid(), clientId, pk.Data())
 		if err != nil {
 			log.Error(err)
 			err = s.CloseWithMsg([]byte("error"))
@@ -137,7 +133,7 @@ func (serve *Server) onBinaryMessageHandler(s *melody.Session, msg []byte) {
 			}
 		}
 	default:
-		err = backend.Instance().WriteBinaryMessage(pk.Mid(), pk.Sid(), sessionId, pk.Data())
+		err = backend.Instance().WriteBinaryMessage(pk.Mid(), pk.Sid(), clientId, pk.Data())
 		if err != nil {
 			log.Error(err)
 			err = s.CloseWithMsg([]byte("error"))
@@ -149,13 +145,18 @@ func (serve *Server) onBinaryMessageHandler(s *melody.Session, msg []byte) {
 }
 
 func (serve *Server) onDisconnectHandler(s *melody.Session) {
-	sessionId := serve.getSessionId(s)
-	users.Instance().Remove(sessionId)
-	log.Infof("客户端断开, sessionId:%d", sessionId)
+	clientId := serve.getClientId(s)
+	users.Instance().Remove(clientId)
+	log.Infof("客户端断开, clientId:%d", clientId)
 }
 
-func (serve *Server) getSessionId(s *melody.Session) uint32 {
-	v, exists := s.Get("sessionId")
+func (serve *Server) onErrorHandler(s *melody.Session, err error) {
+	sessionId := serve.getClientId(s)
+	log.Infof("客户端错误, clientId: %d, err:%serve", sessionId, err.Error())
+}
+
+func (serve *Server) getClientId(s *melody.Session) uint32 {
+	v, exists := s.Get("clientId")
 	if exists {
 		return v.(uint32)
 	}
