@@ -6,9 +6,9 @@ import (
 	"github.com/lw000/gocommon/network/ws/packet"
 	"github.com/olahol/melody"
 	log "github.com/sirupsen/logrus"
+	"gogateway/centerserver/config"
+	"gogateway/centerserver/control"
 	"gogateway/constants"
-	"gogateway/wsserve/config"
-	"gogateway/wsserve/control"
 	"net/http"
 	"time"
 )

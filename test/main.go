@@ -32,7 +32,7 @@ func (ev *EventHandler) Receiver(conn *websocket.Conn, pk *typacket.Packet) {
 	log.Printf("接收：uid:%d, message:%s", ack.GetCode(), ack.GetMsg())
 }
 
-func TestMessage(fc *client.WsClient, uid uint32) {
+func TestMessage(c *client.WsClient, uid uint32) {
 	t := time.NewTicker(time.Millisecond * time.Duration(cfg.Millisecond))
 	defer t.Stop()
 	for {
@@ -40,7 +40,7 @@ func TestMessage(fc *client.WsClient, uid uint32) {
 		case <-t.C:
 			{
 				req := Tmsg.ReqTestMessage{Uid: uid, Msg: "test message 1"}
-				err := fc.WriteProtoMessage(constants.MdmClient, constants.SubClientMsg, &req, &EventHandler{})
+				err := c.WriteProtoMessage(constants.MdmClient, constants.SubClientMsg, &req, &EventHandler{})
 				if err != nil {
 					log.Println(err)
 					return
@@ -49,7 +49,7 @@ func TestMessage(fc *client.WsClient, uid uint32) {
 
 			{
 				req := Tmsg.ReqTestMessage{Uid: uid, Msg: "test message 2"}
-				err := fc.WriteProtoMessage(constants.MdmClient, constants.SubClientMsg, &req, &EventHandler{})
+				err := c.WriteProtoMessage(constants.MdmClient, constants.SubClientMsg, &req, &EventHandler{})
 				if err != nil {
 					log.Println(err)
 					return

@@ -85,18 +85,19 @@ func (serve *Server) onConnectHandler(s *melody.Session) {
 }
 
 func (serve *Server) onBinaryMessageHandler(s *melody.Session, msg []byte) {
-	var err error
-	v, exists := s.Get("clientId")
-	if !exists {
+	clientId := serve.getClientId(s)
+	if clientId <= 0 {
 		_ = s.CloseWithMsg([]byte("error"))
 		return
 	}
-	clientId := v.(uint32)
 
-	var pk *typacket.Packet
+	var (
+		err error
+		pk  *typacket.Packet
+	)
 	pk, err = typacket.NewPacketWithData(msg)
 	if err != nil {
-		_ = s.CloseWithMsg([]byte("error"))
+		_ = s.CloseWithMsg([]byte("core error"))
 		return
 	}
 
@@ -109,7 +110,7 @@ func (serve *Server) onBinaryMessageHandler(s *melody.Session, msg []byte) {
 	}
 
 	if !allowForward {
-		_ = s.CloseWithMsg([]byte("error"))
+		_ = s.CloseWithMsg([]byte("core error"))
 		return
 	}
 

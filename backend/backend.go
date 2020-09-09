@@ -43,22 +43,24 @@ func Instance() *Server {
 	return _serveInstance
 }
 
-func (s *Server) init() *Server {
-	s.wsc.HandleMessageBinary(s.onMessageBinaryHandler)
-	s.wsc.HandleError(s.onErrorHandler)
-	return s
+func (serve *Server) init() *Server {
+	serve.wsc.HandleMessageBinary(serve.onMessageBinaryHandler)
+	serve.wsc.HandleError(serve.onErrorHandler)
+	return serve
 }
 
-func (s *Server) Start() error {
-	err := s.wsc.Open(global.ProjectConfig.BackendConf.Scheme, global.ProjectConfig.BackendConf.Host, global.ProjectConfig.BackendConf.Path)
+func (serve *Server) Start() error {
+	err := serve.wsc.Open(global.ProjectConfig.BackendConf.Scheme,
+		global.ProjectConfig.BackendConf.Host,
+		global.ProjectConfig.BackendConf.Path)
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	go s.wsc.Run()
+	go serve.wsc.Run()
 
-	err = s.registerService()
+	err = serve.registerService()
 	if err != nil {
 		log.Error(err)
 		return err
@@ -67,36 +69,31 @@ func (s *Server) Start() error {
 	return nil
 }
 
-func (s *Server) Stop() {
-	if s == nil {
+func (serve *Server) Stop() {
+	if serve == nil {
 		return
 	}
-	s.wsc.Close()
+	serve.wsc.Close()
 }
 
-func (s *Server) WriteProtoMessage(mid, sid uint16, clientId uint32, pb proto.Message) error {
-	return s.wsc.WriteProtoMessage(mid, sid, clientId, pb)
+func (serve *Server) WriteProtoMessage(mid, sid uint16, clientId uint32, pb proto.Message) error {
+	return serve.wsc.WriteProtoMessage(mid, sid, clientId, pb)
 }
 
-func (s *Server) WriteBinaryMessage(mid, sid uint16, clientId uint32, data []byte) error {
-	return s.wsc.WriteBinaryMessage(mid, sid, clientId, data)
+func (serve *Server) WriteBinaryMessage(mid, sid uint16, clientId uint32, data []byte) error {
+	return serve.wsc.WriteBinaryMessage(mid, sid, clientId, data)
 }
 
-// 注册服务到路由服务器
-func (s *Server) registerService() error {
+// 注册服务到中心服务器
+func (serve *Server) registerService() error {
 	req := Tserve.ReqRegService{
 		ServerId: constants.GatewayServerId,
 		SvrType:  constants.GatewayServerType,
 	}
-	err := s.wsc.WriteProtoMessage(constants.MdmGatewayService, constants.SubGatewayServiceRegister, tyutils.HashCode(tyutils.UUID()), &req)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	return nil
+	return serve.WriteProtoMessage(constants.MdmGatewayService, constants.SubGatewayServiceRegister, tyutils.HashCode(tyutils.UUID()), &req)
 }
 
-func (s *Server) onMessageBinaryHandler(msg []byte) error {
+func (serve *Server) onMessageBinaryHandler(msg []byte) error {
 	pk, err := typacket.NewPacketWithData(msg)
 	if err != nil {
 		log.Error("非法协议")
@@ -134,5 +131,5 @@ func (s *Server) onMessageBinaryHandler(msg []byte) error {
 	return nil
 }
 
-func (s *Server) onErrorHandler(w *client.WsClient, err error) {
+func (serve *Server) onErrorHandler(w *client.WsClient, err error) {
 }
