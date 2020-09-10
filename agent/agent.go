@@ -6,27 +6,27 @@ import (
 )
 
 type Agent struct {
-	userId      uint32
-	clientId    uint32
-	session     *melody.Session
-	connectTime time.Time
-	loginTime   time.Time
-	leaveTime   time.Time
+	userId    uint32
+	clientId  uint32
+	session   *melody.Session
+	connTime  time.Time
+	loginTime time.Time
+	leaveTime time.Time
 }
 
 func New(clientId uint32, session *melody.Session) *Agent {
 	return &Agent{
-		clientId:    clientId,
-		session:     session,
-		connectTime: time.Now(),
+		clientId: clientId,
+		session:  session,
+		connTime: time.Now(),
 	}
 }
 
-func (a *Agent) GetClientIdId() uint32 {
+func (a *Agent) ClientIdId() uint32 {
 	return a.clientId
 }
 
-func (a *Agent) WriteMessage(data []byte) error {
+func (a *Agent) SendClientMessage(data []byte) error {
 	if !a.session.IsClosed() {
 		return a.session.WriteBinary(data)
 	}

@@ -1,6 +1,7 @@
 package frontend
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/lw000/gocommon/network/ws/packet"
 	"github.com/lw000/gocommon/utils"
 	"github.com/olahol/melody"
@@ -12,6 +13,16 @@ import (
 	"sync"
 	"time"
 )
+
+func RegisterFrontendService(engine *gin.Engine) {
+	engine.GET("/ws", func(c *gin.Context) {
+		err := Instance().HandleRequest(c.Writer, c.Request)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+	})
+}
 
 type MsgHooksFunc = func(pk *typacket.Packet) bool
 
@@ -69,8 +80,10 @@ func (serve *Server) Stop() {
 	}
 }
 
-func (serve *Server) AddMessageHook(fun ...MsgHooksFunc) {
-	serve.messagesHooks = append(serve.messagesHooks, fun...)
+func (serve *Server) AddMessageHook(funcs ...MsgHooksFunc) {
+	if len(funcs) > 0 {
+		serve.messagesHooks = append(serve.messagesHooks, funcs...)
+	}
 }
 
 func (serve *Server) HandleRequest(w http.ResponseWriter, r *http.Request) error {
@@ -152,8 +165,8 @@ func (serve *Server) onDisconnectHandler(s *melody.Session) {
 }
 
 func (serve *Server) onErrorHandler(s *melody.Session, err error) {
-	sessionId := serve.getClientId(s)
-	log.Infof("客户端错误, clientId: %d, err:%serve", sessionId, err.Error())
+	clientId := serve.getClientId(s)
+	log.Infof("客户端错误, clientId: %d, err:%s", clientId, err.Error())
 }
 
 func (serve *Server) getClientId(s *melody.Session) uint32 {

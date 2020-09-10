@@ -8,12 +8,17 @@ import (
 	"gogateway/backend"
 	"gogateway/frontend"
 	"gogateway/global"
+	"gogateway/proxy/base_proxy"
+	"gogateway/proxy/center_proxy"
+	"gogateway/proxy/game_proxy"
+	"gogateway/proxy/hall_proxy"
+	"gogateway/proxy/master_proxy"
 	"time"
 )
 
 type Program struct {
-	w        *watcher.Watcher
-	htpServe GinServer
+	w         *watcher.Watcher
+	httpServe GinServer
 }
 
 func (p *Program) Init(env svc.Environment) error {
@@ -53,7 +58,7 @@ func (p *Program) Start() error {
 	// frontend.Instance().AddMessageHook(frontend.CheckMessageCode())
 
 	// TODO: 启动http服务
-	err = p.htpServe.Start(global.ProjectConfig.Debug, global.ProjectConfig.Servers.Server)
+	err = p.httpServe.Start(global.ProjectConfig.Debug, global.ProjectConfig.Servers.Server)
 	if err != nil {
 		log.Error(err)
 		return err
@@ -110,16 +115,28 @@ func (p *Program) Start() error {
 // Windows Service is stopped.
 func (p *Program) Stop() error {
 	p.w.Close()
-	p.htpServe.Stop()
+	p.httpServe.Stop()
 	frontend.Instance().Stop()
 	backend.Instance().Stop()
-	log.Error("GATEWAY·服务退出")
+	log.Info("GATEWAY·服务退出")
 	return nil
 }
 
-func main() {
-	err := svc.Run(&Program{})
+func RunProxy(p base_proxy.BaseProxy) {
+	err := p.Start()
 	if err != nil {
+
+	}
+	p.Stop()
+}
+
+func main() {
+	RunProxy(game_proxy.Create())
+	RunProxy(hall_proxy.Create())
+	RunProxy(master_proxy.Create())
+	RunProxy(center_proxy.Create())
+
+	if err := svc.Run(&Program{}); err != nil {
 		log.Error(err)
 	}
 }

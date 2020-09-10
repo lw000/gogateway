@@ -34,7 +34,7 @@ func (c *ClientAgents) Remove(clientId uint32) {
 	c.agents.Delete(clientId)
 }
 
-func (c *ClientAgents) WriteMessage(clientId uint32, data []byte) error {
+func (c *ClientAgents) SendClientMessage(clientId uint32, data []byte) error {
 	v, exists := c.agents.Load(clientId)
 	if !exists {
 		return errors.New(0, "客户端不存在")
@@ -43,5 +43,5 @@ func (c *ClientAgents) WriteMessage(clientId uint32, data []byte) error {
 	if !ok {
 		return errors.New(0, "内部错误")
 	}
-	return clientAgent.WriteMessage(data)
+	return clientAgent.SendClientMessage(data)
 }

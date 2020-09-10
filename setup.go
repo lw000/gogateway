@@ -6,7 +6,7 @@ import (
 	"github.com/lw000/gocommon/app/gin"
 	"github.com/lw000/gocommon/web/gin/middleware"
 	"gogateway/config"
-	"gogateway/routers"
+	"gogateway/frontend"
 	"net/http"
 	"strings"
 
@@ -82,7 +82,7 @@ func (gs *GinServer) getHandler(debug int64, serveConf *config.Server) http.Hand
 
 	engine := app.Engine()
 
-	routers.RegisterService(engine)
+	frontend.RegisterFrontendService(engine)
 
 	return engine
 }

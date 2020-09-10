@@ -122,7 +122,7 @@ func (serve *Server) onMessageBinaryHandler(msg []byte) error {
 			log.Error(err)
 			return err
 		}
-		err = users.Instance().WriteMessage(pk.ClientId(), ack.Data())
+		err = users.Instance().SendClientMessage(pk.ClientId(), ack.Data())
 		if err != nil {
 			log.Error(err)
 			return err
